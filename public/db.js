@@ -2,7 +2,7 @@ let db;
 let budgetVersion;
 
 // Creating the budget database within the IndexDB
-const request = indexedDB.open('budgetDB', budgetVesion || 21);
+const request = indexedDB.open('budgetDB', budgetVersion || 21);
 
 // Checks if an update is needed, if it is needed we update the database
 request.onupgradeneeded = e => {
