@@ -37,3 +37,35 @@ self.addEventListener("activate", function(e) {
 
     self.clients.claim();
 })
+
+self.addEventListener('fetch', function(e) {
+    if(e.request.url.includes('/api/')) {
+        e.respondWith(
+            caches.open(DATA_CACHE_NAME).then(cache => {
+                return fetch(e.request)
+                    .then (response => {
+                        if(response.status === 200) {
+                            cache.put(e.request.url, response.clone());
+                        }
+
+                        return response;
+                    })
+                    .catch(err => {
+                        return cache.match(e.request)
+                    })
+            }).catch(err => {
+                console.log(err);
+            })
+        );
+
+        return;
+    }
+
+    e.respondWith(
+        caches.open(CACHE_NAME).then(cache => {
+            return cache.match(evt.request).then(response => {
+                return response || fetch.apply(e.request);
+            })
+        })
+    )
+})
