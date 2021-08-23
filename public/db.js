@@ -57,3 +57,26 @@ function checkDatabase () {
         }
     }
 }
+
+// Once the request is finished we check to see if the database is online then we run our database function to insert everything into the API.
+request.onsuccess = function (e) {
+    db = e.target.result;
+
+    if(navigator.onLine) {
+        checkDatabase();
+    }
+}
+
+// SaveRecord will save whatever input we are doing while the server is offline
+const saveRecord = (record) => {
+    console.log('Save Record!');
+
+    const transaction = db.transaction(['BudgetStore'], 'readwrite');
+
+    const store = transaction.objectScore('BudgetStore');
+
+    store.add(record);
+};
+
+// Checks for if the app is back online to call our checkDatabase function
+window.addEventListener('online', checkDatabase)
