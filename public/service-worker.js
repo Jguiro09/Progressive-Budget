@@ -28,7 +28,7 @@ self.addEventListener("activate", function(e) {
         })
         .then((cachesToDelete) => {
             return Promise.all(
-                cachesToDelte.map((cacheToDelete) => {
+                cachesToDelete.map((cacheToDelete) => {
                     return caches.delete(cacheToDelete);
                 })
             );
