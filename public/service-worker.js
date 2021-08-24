@@ -18,64 +18,36 @@ self.addEventListener("install", function(e) {
             console.log('Your files have been pre-cached!');
             return cache.addAll(FILES_TO_CACHE);
         })
-        .then(self.skipWaiting())
-    );
-})
-
-self.addEventListener("activate", function(e) {
-    const currentCaches = [CACHE_NAME, DATA_CACHE_NAME]
-    e.waitUntil(
-        caches.keys().then(cacheNames => {
-            return cacheNames.filter((cacheName) => !currentCaches.includes(cacheName));
-        })
-        .then((cachesToDelete) => {
-            return Promise.all(
-                cachesToDelete.map((cacheToDelete) => {
-                    return caches.delete(cacheToDelete);
-                })
-            );
-        })
-        .then(() => self.clients.claim())
     );
 })
 
 self.addEventListener('fetch', function(e) {
-    if (
-        e.request.method !== "GET" ||
-        !e.request.url.startsWith(self.location.origin)
-    ) {
-        e.respondWith(fetch(e.request));
-        return;
-    }
-
-    if (e.request.url.includes("/api/transaction")) {
-
+    if (e.request.url.includes("/api/")) {
         e.respondWith(
-            caches.open(RUNTIME_CACHE).then(cache => {
+            caches.open(DATA_CACHE_NAME).then(cache => {
                 return fetch(e.request)
                     .then(response => {
-                        cache.put(e.request, response.clone());
+                        if(response.status === 200){
+                            cache.put(e.request.url, response.clone());
+                        }
                         return response;
                     })
                     .catch(() => caches.match(e.request));
             })
+            .catch(err => console.log(err))
         );
         return;
     }
 
     e.respondWith(
-        caches.match(e.request).then(cachedResponse => {
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-
-            return caches.open(RUNTIME_CACHE).then(cache => {
-                return fetch(e.request).then(response => {
-                    return cache.put(e.request, response.clone()).then(() => {
-                        return response;
-                    });
-                });
-            });
+        fetch(e.request).catch(function() {
+            return caches.match(e.request).then(function(response) {
+                if(response)
+                    return response;
+                else if(e.request.headers.get("accept").includes("text/html")) {
+                    return caches.match('/');
+                }
+            })
         })
     );
 })
