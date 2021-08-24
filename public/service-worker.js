@@ -4,10 +4,10 @@ const FILES_TO_CACHE = [
     '/index.html',
     '/index.js',
     '/styles.css',
-    '/manifest.json'
+    '/manifest.webmanifest'
 ];
 
-const CACHE_NAME = 'static-cache-v3';
+const CACHE_NAME = 'static-cache-v1';
 const DATA_CACHE_NAME = 'data-cache-v1';
 
 self.addEventListener("install", function(e) {
@@ -18,7 +18,7 @@ self.addEventListener("install", function(e) {
         })
     );
 
-    self.skipWainting();
+    self.skipWaiting();
 })
 
 self.addEventListener("activate", function(e) {
